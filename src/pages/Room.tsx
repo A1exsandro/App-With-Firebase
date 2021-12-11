@@ -1,22 +1,68 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import logoImg from '../assests/images/logo.svg';
 import { Button } from '../components/Button';
 import { RoomCode } from '../components/RoomCode';
 import { useAuth } from '../hooks/useAuth';
-import { database, ref, push } from '../services/firebase';
+import { database, ref, push, onValue } from '../services/firebase';
 
 
 import '../styles/room.scss';
+
+type FirebaseQuestions = Record<string, {
+    author: {
+        name:string;
+        avatar: string;
+    }
+    content: string;
+    isAnswered: boolean;
+    isHighlighted: boolean;
+}>
+
+type Question = {
+    id: string;
+    author: {
+        name:string;
+        avatar: string;
+    }
+    content: string;
+    isAnswered: boolean;
+    isHighlighted: boolean;
+}
 
 
 export function Room() {
     const { user } = useAuth();
     const { id } = useParams();
     const [newQuestion, setNewQuestion] = useState ('');
+    const [questions, setQuestions] = useState<Question[]>([]);
+    const [title, setTitle] = useState('');
 
     const roomId = id;
+
+    useEffect(() => {
+        const roomRef = ref(database,`rooms/${roomId}`);
+    
+        // testar medoto once()
+        onValue(roomRef, room => {
+            const databaseRoom = room.val();
+            const FirebaseQuestions: FirebaseQuestions = databaseRoom.questions ?? {};
+           const parsedQuestion = Object.entries(FirebaseQuestions).map(([key, value]) => {
+               return {
+                   id: key,
+                   content: value.content,
+                   author: value.author,
+                   isHighlighted: value.isHighlighted,
+                   isAnswered: value.isAnswered,
+               }
+           });
+           setTitle(databaseRoom.title);
+           setQuestions(parsedQuestion);  
+        });
+
+    }, [roomId]);
+
 
     async function handleSendQuestion(event: FormEvent){
         event.preventDefault();
@@ -56,8 +102,8 @@ export function Room() {
             
             <main>
                 <div className="room-title">
-                    <h1>Sala React</h1>
-                    <span id="quest">4 perguntas</span>
+                    <h1>Sala {title}</h1>
+                    {questions.length > 0 && <span id="quest">{questions.length} pergunta(s)</span>}
                 </div>
 
                 <form onSubmit={handleSendQuestion}>
@@ -80,6 +126,7 @@ export function Room() {
                         <Button type="submit" disabled={!user}>Enviar Pergunta</Button>
                     </div>
                 </form>
+                {JSON.stringify(questions)}
             </main>
         </div>
     );
