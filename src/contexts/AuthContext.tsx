@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-redeclare */
 import { signInWithPopup } from "@firebase/auth";
 import { createContext, ReactNode, useEffect, useState } from "react";
 import { auth, provider } from "../services/firebase";
@@ -18,7 +19,6 @@ type AuthConstextProvider = {
 }
 
 export const AuthConstext = createContext({} as AuthContextType);
-
 
 export function AuthConstextProvider(props: AuthConstextProvider) {
   const [user, setUser] = useState<User>();

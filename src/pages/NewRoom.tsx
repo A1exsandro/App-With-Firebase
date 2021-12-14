@@ -8,7 +8,7 @@ import logoImg from '../assests/images/logo.svg';
 
 
 import { Button } from '../components/Button';
-import { database, set, ref, push, auth, onValue  } from '../services/firebase';
+import { database, set, ref, push } from '../services/firebase';
 import { useAuth } from '../hooks/useAuth';
 
 

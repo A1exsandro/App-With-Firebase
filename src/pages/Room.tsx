@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 
 import logoImg from '../assests/images/logo.svg';
 import { Button } from '../components/Button';
+import { Question } from '../components/Question';
 import { RoomCode } from '../components/RoomCode';
 import { useAuth } from '../hooks/useAuth';
 import { database, ref, push, onValue } from '../services/firebase';
@@ -44,7 +45,6 @@ export function Room() {
     useEffect(() => {
         const roomRef = ref(database,`rooms/${roomId}`);
     
-        // testar medoto once()
         onValue(roomRef, room => {
             const databaseRoom = room.val();
             const FirebaseQuestions: FirebaseQuestions = databaseRoom.questions ?? {};
@@ -126,7 +126,14 @@ export function Room() {
                         <Button type="submit" disabled={!user}>Enviar Pergunta</Button>
                     </div>
                 </form>
-                {JSON.stringify(questions)}
+                {questions.map(question => {
+                    return (
+                        <Question 
+                            content={question.content}
+                            author={question.author}
+                        />
+                    );
+                })}
             </main>
         </div>
     );
